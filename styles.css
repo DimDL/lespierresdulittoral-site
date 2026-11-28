@@ -1,0 +1,465 @@
+/* Les Pierres du Littoral : feuille unique, mobile d'abord (points de rupture 768 et 960 px). */
+:root {
+  color-scheme: light;
+  --fond: #F7F4EE;
+  --carte: #FFFFFF;
+  --encre: #2A2622;
+  --doux: #6B635A;
+  --filet: #E4DED3;
+  --bleu: #2E4A62;
+  --bleu-fonce: #22384B;
+  --accent: #C8693B;
+  --serif: ui-serif, "New York", "Iowan Old Style", Georgia, "Times New Roman", serif;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --rayon: 14px;
+  --arrondi: 10px; /* photos de la galerie et boutons */
+  --ressort: cubic-bezier(0.34, 1.56, 0.64, 1); /* dépasse sa cible puis revient : effet ressort */
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; scroll-padding-top: 64px; }
+body {
+  margin: 0;
+  background: var(--fond);
+  color: var(--encre);
+  font: 17px/1.6 var(--sans);
+  padding-bottom: 66px;
+  padding-bottom: calc(66px + env(safe-area-inset-bottom));
+}
+img { max-width: 100%; height: auto; display: block; }
+a { color: var(--bleu); text-underline-offset: 0.15em; }
+/* Une adresse e-mail longue se coupe plutôt que d'élargir la page d'un petit écran. */
+a[data-u] { word-wrap: break-word; overflow-wrap: break-word; }
+h1, h2, h3 { font-family: var(--serif); font-weight: 600; line-height: 1.2; margin: 0 0 0.5em; letter-spacing: -0.005em; }
+h2 { font-size: 1.75rem; font-size: clamp(1.5rem, 1.15rem + 1.3vw, 2.1rem); }
+h3 { font-size: 1.15rem; }
+p { margin: 0 0 1em; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+ul, ol { padding: 0; margin: 0; list-style: none; }
+/* Deux appuis rapprochés sur un bouton ou un lien (photo suivante, miniature) ne zooment pas la page ; le zoom à deux doigts reste. */
+a, button, summary { touch-action: manipulation; }
+
+.conteneur { max-width: 1180px; margin: 0 auto; padding-left: 16px; padding-right: 16px; }
+.section { padding-top: 32px; padding-bottom: 32px; border-top: 1px solid var(--filet); }
+/* Sections hors de l'écran : styles, mise en page et images seulement à l'approche (téléphones lents) ; « auto » retient la vraie hauteur une fois la section affichée. */
+/* Toujours dessinées : la cible du lien « Nos maisons à vendre » et la section juste au-dessus (Safari ne recale pas la page quand une section change de hauteur pendant un saut d'ancre), et les cartes des maisons (Safari n'y transmet pas le clic de la photo au lien). */
+.section:not(#questions):not(#autres-maisons):not(#maisons) { content-visibility: auto; contain-intrinsic-size: auto 900px; }
+.note { color: var(--doux); font-size: 0.88rem; margin-top: 12px; }
+.note-forte { font-weight: 600; margin-top: 20px; }
+
+/* Bandeau de brouillon : disparaît quand il ne reste rien à trancher. */
+.brouillon { background: #FFF3C9; border-bottom: 1px solid #E6CF7E; font-size: 0.9rem; }
+.brouillon summary { padding: 10px 16px; cursor: pointer; max-width: 1180px; margin: 0 auto; }
+.brouillon-corps { max-width: 1180px; margin: 0 auto; padding: 0 16px 14px; }
+.brouillon h2 { font: 700 0.75rem/1.4 var(--sans); text-transform: uppercase; letter-spacing: 0.06em; margin: 12px 0 4px; }
+.brouillon li { list-style: disc; margin-left: 1.2em; }
+mark.a-decider { background: #FFE58A; padding: 0 0.3em; border-radius: 4px; }
+
+/* En-tête */
+.entete { position: -webkit-sticky; position: sticky; top: 0; z-index: 20; background: rgba(247, 244, 238, 0.94); backdrop-filter: saturate(1.4) blur(10px); -webkit-backdrop-filter: saturate(1.4) blur(10px); border-bottom: 1px solid var(--filet); }
+.entete-ligne { display: flex; align-items: center; justify-content: space-between; height: 56px; }
+.marque { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--serif); font-size: 1.08rem; color: var(--encre); text-decoration: none; letter-spacing: 0.01em; }
+.entete-actions { flex: none; display: flex; align-items: center; margin-left: 12px; }
+.entete-tel { display: none; font-weight: 600; text-decoration: none; margin: 0 16px 0 0; transition: transform 0.45s var(--ressort); }
+.entete-actions .bouton { display: none; }
+
+/* Haut de page. Téléphone : photos d'abord, en bande à faire glisser ; à partir de 768 px : titre centré, une grande photo et trois petites, puis prix et chiffres. */
+.hero { display: flex; flex-direction: column; padding-left: 0; padding-right: 0; padding-bottom: 30px; }
+.hero-photos { order: -1; position: relative; padding-top: 12px; }
+.hero-titre, .hero-prix, .hero .chiffres { padding-left: 16px; padding-right: 16px; }
+.hero-titre { padding-top: 20px; }
+.mosaique { display: flex; overflow-x: auto; -webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory; scroll-padding: 0 12px; padding: 0 12px; scrollbar-width: none; }
+.mosaique::-webkit-scrollbar { display: none; }
+/* Le retrait de fin d'une bande défilante est ignoré par certains navigateurs : un élément vide le remplace. */
+.mosaique::after { content: ""; flex: 0 0 6px; }
+.mosaique li { flex: 0 0 88%; margin-right: 6px; scroll-snap-align: start; }
+.mosaique .vignette img { height: 58vw; }
+.etiquette { position: absolute; left: 8px; top: 8px; padding: 5px 8px; border-radius: 6px; background: rgba(34, 56, 75, 0.9); color: #fff; font: 600 0.72rem/1 var(--sans); letter-spacing: 0.03em; }
+/* Posé sur la zone des photos, pas sur une photo : en bas à droite de celle qui est affichée, il reste en place quand la bande défile (une photo fait 88 % de la largeur, à 12 px du bord). */
+.voir-photos {
+  position: absolute; right: calc(12% + 19px); bottom: 10px; min-height: 36px; padding: 0 12px; border: 0; border-radius: 8px;
+  background: rgba(255, 255, 255, 0.94); color: var(--encre); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+  font: 600 0.85rem/1 var(--sans); cursor: zoom-in;
+  transition: transform 0.45s var(--ressort), box-shadow 0.25s;
+}
+.surtitre { text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.78rem; font-weight: 600; color: #9C4A22; margin-bottom: 8px; }
+.hero h1 { font-size: 1.75rem; font-size: clamp(1.75rem, 1.1rem + 3vw, 3.1rem); line-height: 1.1; margin-bottom: 0.3em; }
+.prix { font-family: var(--serif); font-size: 2.3rem; font-weight: 600; line-height: 1.1; margin: 16px 0 2px; white-space: nowrap; }
+.prix-mention { color: var(--doux); font-size: 0.95rem; margin: 0; }
+/* Chiffres clés sur une ligne, qui passe à la ligne entre deux chiffres. Marges plutôt que gap (Safari avant 14.1). */
+.chiffres { display: flex; flex-wrap: wrap; margin-top: 14px; }
+.chiffres li { margin: 2px 22px 2px 0; }
+.chiffres span { color: var(--doux); }
+.vers-autres { margin: 16px 16px 0; }
+
+/* Page d'ensemble : les prix de chaque maison sous la somme, une carte par maison, un bloc DPE par maison. */
+.prix-detail { color: var(--doux); font-size: 0.95rem; margin: 4px 0 0; }
+.maisons-grille, .autres-grille { display: grid; gap: 28px; margin-top: 20px; }
+.autres-grille { list-style: none; padding: 0; }
+.autres-intro { font-size: 1.05rem; color: var(--doux); margin: 4px 0 0; }
+.autres-grille h3 { font-size: 1.2rem; }
+/* Une carte par maison, toutes de la hauteur de la plus longue (grille) : le bouton, poussé en bas, est à la même hauteur dans les trois. */
+.maison { position: relative; display: flex; flex-direction: column; background: var(--carte); border: 1px solid var(--filet); border-radius: var(--rayon); overflow: hidden; box-shadow: 0 1px 3px rgba(42, 38, 34, 0.06); transition: box-shadow 0.25s, border-color 0.25s; }
+.maison .vignette { border-radius: 0; }
+.maison .vignette img, .maison-photo img { aspect-ratio: 3 / 2; }
+.maison-photo { overflow: hidden; background: var(--filet); }
+.maison-photo img { display: block; width: 100%; object-fit: cover; transition: transform 0.5s; }
+.maison-corps { flex: 1; display: flex; flex-direction: column; padding: 4px 20px 20px; }
+.maison-action { margin: auto 0 0; padding-top: 14px; }
+.maison-action .bouton { width: 100%; }
+/* Carte d'une maison en ligne : le lien du titre la couvre entière ; un seul survol, celui de la carte (zoom de la photo, bouton teinté). */
+.maison-lien { color: inherit; text-decoration: none; }
+.maison-lien::after { content: ""; position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 1; }
+.maison-lien:focus { outline: none; }
+.maison-cliquable .bouton { transition: background-color 0.2s; }
+@media (hover: hover) {
+  .maison-cliquable:hover { border-color: #D6CDBE; box-shadow: 0 12px 28px rgba(42, 38, 34, 0.12); }
+  .maison-cliquable:hover .maison-photo img { transform: scale(1.04); }
+  .maison-cliquable:hover .bouton { background: rgba(46, 74, 98, 0.08); }
+}
+.maison-cliquable:focus-within { border-color: var(--bleu); box-shadow: 0 0 0 3px rgba(46, 74, 98, 0.25); }
+.maisons-plan { margin-top: 16px; }
+.maison h3 { font-size: 1.3rem; margin: 14px 0 2px; }
+.maison-prix { font-family: var(--serif); font-size: 1.35rem; font-weight: 600; margin: 0; }
+.maison-chiffres { color: var(--doux); font-size: 0.95rem; margin: 0 0 8px; }
+/* Sous le bouton, centrée : le bouton est calé en bas de la carte, la ligne suit, alignée d'une carte à l'autre. */
+.maison-medias { color: var(--doux); font-size: 0.85rem; text-align: center; margin: 8px 0 0; }
+.dpe-accroche { font-family: var(--serif); font-size: 1.45rem; font-weight: 600; line-height: 1.25; margin: 0 0 4px; }
+.dpe-maison { margin-top: 28px; }
+.depenses-lots { width: 100%; border-collapse: collapse; background: var(--carte); border: 1px solid var(--filet); border-radius: 12px; font-size: 0.92rem; }
+.depenses-lots caption { text-align: left; font-weight: 600; padding: 0 0 8px; }
+.depenses-lots th, .depenses-lots td { text-align: left; vertical-align: top; padding: 9px 12px; border-top: 1px solid var(--filet); }
+.depenses-lots thead th { border-top: 0; color: var(--doux); font-size: 0.8rem; font-weight: 600; }
+.depenses-lots .note { display: block; margin-top: 2px; font-size: 0.78rem; font-weight: 400; }
+.depenses-lots .montant { white-space: nowrap; }
+.dpe-maison h3 { font-size: 1.2rem; }
+
+/* L'essentiel : les cinq points forts, sur un fond sable plus soutenu que la page. */
+.essentiel { background: #EFE7D8; border-top: 1px solid #E0D5C1; border-bottom: 1px solid #E0D5C1; padding: 28px 0 20px; }
+.essentiel h2 { font: 600 0.78rem/1.4 var(--sans); text-transform: uppercase; letter-spacing: 0.12em; color: #9C4A22; margin-bottom: 12px; }
+.essentiel li { padding: 13px 0 12px; border-top: 1px solid rgba(42, 38, 34, 0.16); }
+.essentiel h3 { font-size: 1.28rem; margin-bottom: 3px; }
+.essentiel p { margin: 0; color: #4F4840; font-size: 0.97rem; line-height: 1.5; }
+.essentiel + .section { border-top: 0; }
+
+/* Marges plutôt que gap : Safari avant 14.1 ignore gap dans un flex, les boutons s'y toucheraient. */
+.boutons { display: flex; flex-wrap: wrap; margin: 15px -5px -5px; }
+.boutons > * { margin: 5px; }
+.bouton {
+  display: inline-flex; align-items: center; justify-content: center; flex: 1 1 auto;
+  min-height: 48px; padding: 0 20px; border-radius: var(--arrondi);
+  border: 1.5px solid var(--bleu); color: var(--bleu); background: transparent;
+  font: 600 1rem/1 var(--sans); text-decoration: none; cursor: pointer;
+  transition: transform 0.45s var(--ressort), box-shadow 0.25s, background-color 0.15s, color 0.15s;
+}
+.bouton-plein { background: var(--bleu); color: #fff; }
+.bouton-petit { flex: 0 0 auto; min-height: 38px; padding: 0 16px; font-size: 0.92rem; }
+@media (hover: hover) {
+  .bouton:hover { background: rgba(46, 74, 98, 0.08); transform: translateY(-2px) scale(1.04); box-shadow: 0 8px 18px rgba(46, 74, 98, 0.18); }
+  .voir-photos:hover { transform: translateY(-2px) scale(1.04); box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3); }
+  .entete-tel:hover { transform: translateY(-2px) scale(1.04); }
+  .bouton-plein:hover { background: var(--bleu-fonce); }
+}
+.bouton:active, .barre-actions a:active { transform: scale(0.96); transition-duration: 0.12s; }
+
+/* Visite, niveau par niveau : titre, plan 3D, texte et surfaces, photos. */
+.niveau > h2 { margin-bottom: 14px; }
+.niveau-plan { margin-bottom: 18px; }
+.niveau-plan .vignette { background: transparent; }
+.plan-2d { margin: 10px 0 0; }
+.niveau-texte p { max-width: 62ch; }
+.pieces { width: 100%; max-width: 420px; border-collapse: collapse; margin: 4px 0 24px; font-size: 0.97rem; }
+.pieces th, .pieces td { padding: 7px 0; border-bottom: 1px solid var(--filet); }
+.pieces th { text-align: left; font-weight: 500; }
+.pieces td { padding-left: 12px; text-align: right; font-weight: 600; }
+.pieces .total th, .pieces .total td { border-bottom: 0; padding-top: 10px; color: var(--doux); font-size: 0.92rem; }
+.pieces .total td { color: var(--encre); }
+
+/* Vignettes : deux colonnes sur téléphone ; une « grande » prend la largeur, en tête de son bloc (rangée --rang). */
+.galerie { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.galerie .grande { grid-column: span 2; grid-row: var(--rang); }
+.galerie-impaire li:first-child { grid-column: span 2; }
+.plus-photos { margin: 12px 0 0; }
+.plus-photos button, .plan-2d button { min-height: 40px; padding: 0 16px; border: 1.5px solid var(--bleu); border-radius: var(--arrondi); background: transparent; color: var(--bleu); font: 600 0.95rem/1 var(--sans); cursor: zoom-in; }
+.vignette { position: relative; display: block; width: 100%; padding: 0; border: 0; background: var(--filet); border-radius: var(--arrondi); overflow: hidden; cursor: zoom-in; }
+.vignette picture { display: block; }
+/* Le format 3:2 ne vaut que pour les photos : un plan garde celui de ses attributs width et height, qui lui réservent sa place avant le chargement. */
+.vignette img { width: 100%; object-fit: cover; transition: transform 0.4s; }
+.galerie .vignette img { aspect-ratio: 3 / 2; }
+.vignette:hover img { transform: scale(1.03); }
+
+/* Travaux : une icône par ligne, le mot concret en gras, une coche verte ; dessous, les photos du chantier. */
+.refait li { display: flex; align-items: flex-start; padding: 11px 0; border-bottom: 1px solid var(--filet); }
+.refait-icone { flex: none; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin-right: 14px; border-radius: 12px; background: #EFE7D8; color: var(--bleu); }
+.refait p { flex: 1; min-width: 0; margin: 0; }
+.refait strong { display: block; font-weight: 600; }
+.refait p span { display: block; color: var(--doux); font-size: 0.95rem; line-height: 1.45; }
+.refait-coche { flex: none; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; margin: 10px 0 0 12px; border-radius: 50%; background: #2E7D4F; color: #fff; font: 700 0.8rem/1 var(--sans); }
+.chantier-photos { display: flex; margin: 18px -5px 0; }
+.chantier { flex: 1; min-width: 0; margin: 0 5px; }
+.chantier img { width: 100%; height: 26vw; max-height: 150px; object-fit: cover; border-radius: var(--arrondi); }
+.chantier figcaption { color: var(--doux); font-size: 0.86rem; margin-top: 6px; word-wrap: break-word; overflow-wrap: break-word; }
+.liste-simple li { position: relative; padding-left: 1.2em; margin: 0 0 0.5em; }
+.liste-simple li::before { content: ""; position: absolute; left: 0.2em; top: 0.7em; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.chapeau { max-width: 68ch; font-size: 1.06rem; }
+.travaux-grille { display: grid; gap: 28px; align-items: start; margin-top: 20px; }
+.travaux-grille > * { min-width: 0; }
+.dossier { background: var(--carte); border: 1px solid var(--filet); border-top: 4px solid var(--accent); border-radius: 12px; padding: 20px 22px 22px; }
+.dossier h3 { font-size: 1.3rem; }
+/* À droite du titre, une pile de feuilles : une blanche, puis les plans 2D en miniature ; elle ouvre le PDF des plans. */
+.dossier-tete { display: flex; align-items: flex-start; }
+.dossier-tete h3 { flex: 1; min-width: 0; }
+.dossier-pile { position: relative; flex: none; display: block; width: 104px; height: 84px; margin: 0 6px 12px 16px; }
+.feuille { position: absolute; left: 0; top: 4px; display: block; width: 100%; height: 76px; padding: 4px; background: #fff; border-radius: 3px; box-shadow: 0 1px 2px rgba(42, 38, 34, 0.22), 0 6px 14px rgba(42, 38, 34, 0.16); transition: transform 0.45s var(--ressort); }
+.feuille img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.feuille:nth-child(1) { transform: rotate(9deg) translate(5px, 1px); }
+.feuille:nth-child(2) { transform: rotate(4deg) translate(2px, 0); }
+.feuille:nth-child(3) { transform: rotate(-3deg); }
+@media (hover: hover) { a.dossier-pile:hover .feuille:nth-child(3) { transform: rotate(-5deg) translateY(-3px); } }
+.dossier-fichier { margin: 0 0 14px; }
+.dossier-fichier a { font-weight: 600; }
+.dossier-fichier span { color: var(--doux); font-size: 0.9rem; white-space: nowrap; }
+
+/* DPE */
+.echelles { display: grid; gap: 28px; margin: 22px 0; }
+.echelle { margin: 0; }
+.echelle figcaption { font-weight: 600; font-size: 0.92rem; margin-bottom: 8px; }
+.cran { display: flex; align-items: center; gap: 10px; margin: 3px 0; }
+.cran-barre {
+  display: flex; align-items: center; gap: 8px; height: 28px; padding: 0 16px 0 8px;
+  width: calc(34% + var(--i) * 8%);
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%);
+  color: #fff; font-size: 0.78rem;
+}
+.cran-lettre { font-weight: 800; font-size: 0.95rem; width: 16px; }
+.cran.actif .cran-barre { height: 40px; }
+.cran.actif .cran-lettre { font-size: 1.25rem; }
+.cran-valeur { border: 2px solid var(--encre); background: var(--carte); border-radius: 8px; padding: 3px 10px; font-weight: 700; white-space: nowrap; }
+.cran-valeur small { font-weight: 500; color: var(--doux); }
+.echelle-energie .cran-A .cran-barre { background: #009C6D; color: #111; } /* l'encre (#2A2622) ne fait que 4,27:1 sur ce vert officiel */
+.echelle-energie .cran-B .cran-barre { background: #52B153; color: var(--encre); }
+.echelle-energie .cran-C .cran-barre { background: #A5CC74; color: var(--encre); }
+.echelle-energie .cran-D .cran-barre { background: #F4E70F; color: var(--encre); }
+.echelle-energie .cran-E .cran-barre { background: #F0B40F; color: var(--encre); }
+.echelle-energie .cran-F .cran-barre { background: #EB8235; color: var(--encre); }
+.echelle-energie .cran-G .cran-barre { background: #D7221F; }
+.echelle-climat .cran-A .cran-barre { background: #A4DBF8; color: var(--encre); }
+.echelle-climat .cran-B .cran-barre { background: #8CB4D3; color: var(--encre); }
+.echelle-climat .cran-C .cran-barre { background: #7792B1; color: var(--encre); }
+.echelle-climat .cran-D .cran-barre { background: #5E6F8E; }
+.echelle-climat .cran-E .cran-barre { background: #4D5271; }
+.echelle-climat .cran-F .cran-barre { background: #393551; }
+.echelle-climat .cran-G .cran-barre { background: #281B35; }
+.depenses { background: var(--carte); border: 1px solid var(--filet); border-radius: 12px; padding: 14px 16px; font-weight: 500; }
+
+/* Le lieu */
+.lieu-grille { display: grid; gap: 28px; align-items: start; }
+.lieu-grille > * { min-width: 0; }
+.carte { margin: 0; }
+.carte-image { position: relative; border: 1px solid var(--filet); border-radius: var(--arrondi); overflow: hidden; }
+.carte-marque { position: absolute; transform: translate(-50%, -50%); border: 2.5px solid var(--accent); border-radius: 50%; background: rgba(200, 105, 59, 0.16); box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.6); pointer-events: none; }
+.carte-etiquette { position: absolute; transform: translateY(-50%); white-space: nowrap; font: 700 0.85rem/1 var(--sans); color: var(--encre); background: rgba(255, 255, 255, 0.88); padding: 5px 7px; border-radius: 6px; pointer-events: none; }
+.carte-ville { transform: translate(-50%, -50%); font-weight: 600; }
+.carte-hameau { transform: translate(-50%, -50%); }
+@media (max-width: 599px) { .carte-etiquette { font-size: 0.72rem; padding: 4px 6px; } }
+/* Zones des villes : le SVG couvre l'image ; le trait garde son épaisseur quel que soit l'étirement. */
+.carte-zones { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+.carte-zones path { fill: rgba(46, 74, 98, 0.2); stroke: rgba(46, 74, 98, 0.9); stroke-width: 1.5px; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.carte figcaption { color: var(--doux); font-size: 0.86rem; margin-top: 10px; }
+.liste-simple strong { font-weight: 600; }
+.trajets { width: 100%; border-collapse: collapse; margin: 8px 0 0; font-size: 0.97rem; }
+.trajets th, .trajets td { padding: 10px 6px; border-bottom: 1px solid var(--filet); vertical-align: top; overflow-wrap: break-word; -webkit-hyphens: auto; hyphens: auto; }
+@media (max-width: 359px) { .trajets th, .trajets td { padding: 8px 3px; } }
+.trajets thead th { font: 600 0.75rem/1.3 var(--sans); text-transform: uppercase; letter-spacing: 0.05em; color: var(--doux); text-align: right; }
+.trajets thead th:first-child, .trajets th[scope="row"] { text-align: left; }
+.trajets th[scope="row"] { font-weight: 500; padding-left: 0; }
+.trajets td { text-align: right; }
+.trajets td:first-of-type { font-weight: 600; }
+.trajets td.trajet-texte { font-weight: 400; }
+
+/* Histoire : le texte, puis le plan de 1819 et l'esquisse côte à côte, à la même hauteur (colonnes posées par construire.py). */
+.histoire-images { display: grid; gap: 8px; align-items: start; margin-top: 24px; }
+.archive { margin: 0; }
+.archive-image { position: relative; border-radius: var(--arrondi); overflow: hidden; box-shadow: 0 1px 0 var(--filet), 0 10px 30px rgba(42, 38, 34, 0.12); }
+.archive-image img { width: 100%; filter: sepia(0.08) contrast(1.03); }
+.archive-marque { position: absolute; aspect-ratio: 1; transform: translate(-50%, -50%); border: 2.5px solid var(--accent); border-radius: 50%; box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.55); pointer-events: none; }
+.archive-nord { position: absolute; top: 10px; right: 12px; font: 700 0.8rem/1 var(--sans); color: var(--encre); background: rgba(255, 255, 255, 0.75); padding: 5px 7px; border-radius: 6px; }
+.archive figcaption { color: var(--doux); font-size: 0.86rem; margin-top: 10px; }
+.histoire-texte p { max-width: 62ch; }
+.esquisse img { width: 100%; border-radius: var(--arrondi); box-shadow: 0 1px 0 var(--filet), 0 10px 30px rgba(42, 38, 34, 0.12); }
+
+/* Achat en direct */
+.etapes { display: grid; gap: 12px; counter-reset: etape; }
+.etapes li { counter-increment: etape; background: var(--carte); border: 1px solid var(--filet); border-radius: 12px; padding: 16px 18px 4px; }
+.etapes li::before { content: counter(etape); display: block; font: 600 1.6rem/1 var(--serif); color: var(--accent); margin-bottom: 8px; }
+.etapes h3 { margin-bottom: 4px; }
+.notaire { max-width: 68ch; margin-top: 10px; }
+
+/* Questions */
+.faq details { border-bottom: 1px solid var(--filet); }
+.faq summary { list-style: none; cursor: pointer; padding: 14px 32px 14px 0; font-weight: 600; position: relative; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; position: absolute; right: 4px; top: 10px; font-size: 1.4rem; color: var(--bleu); }
+.faq details[open] summary::after { content: "–"; }
+.faq details p { max-width: 68ch; }
+
+/* Qui vend : le récit des propriétaires, puis la carte du contact, son portrait à gauche. */
+.vendeur-accroche { font-family: var(--serif); font-size: 1.28rem; line-height: 1.4; }
+.vendeur-recit p { max-width: 62ch; }
+.contact { display: flex; align-items: center; background: var(--carte); border: 1px solid var(--filet); border-radius: 12px; padding: 16px 18px; margin: 20px 0 0; max-width: 460px; }
+.portrait { flex: none; display: block; width: 84px; height: 84px; margin-right: 16px; border-radius: 50%; overflow: hidden; }
+.portrait img { width: 100%; height: 100%; object-fit: cover; }
+.contact-texte { flex: 1; min-width: 0; }
+.contact p { margin: 0 0 4px; }
+.contact-role { color: var(--doux); font-size: 0.92rem; line-height: 1.35; }
+.contact a { font-weight: 600; word-break: break-all; }
+.vendeur .boutons { max-width: 620px; }
+
+.mentions { color: var(--doux); font-size: 0.86rem; }
+.pied { border-top: 1px solid var(--filet); padding: 28px 0 32px; color: var(--doux); font-size: 0.9rem; }
+.pied-marque { font-family: var(--serif); color: var(--encre); font-size: 1.05rem; }
+
+/* Barre d'actions du mobile */
+.barre-actions {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+  display: grid; grid-template-columns: 1fr 1.7fr; gap: 8px;
+  padding: 8px 12px;
+  padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+  background: rgba(247, 244, 238, 0.96); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid var(--filet);
+}
+.barre-actions a {
+  display: flex; align-items: center; justify-content: center; min-height: 46px; border-radius: var(--arrondi);
+  border: 1.5px solid var(--bleu); color: var(--bleu); font-weight: 600; text-decoration: none;
+  transition: transform 0.45s var(--ressort), box-shadow 0.25s, background-color 0.15s;
+}
+.barre-actions .barre-principal { background: var(--bleu); color: #fff; }
+@media (hover: hover) {
+  .barre-actions a:hover { background: rgba(46, 74, 98, 0.08); transform: translateY(-2px) scale(1.04); box-shadow: 0 8px 18px rgba(46, 74, 98, 0.18); }
+  .barre-actions .barre-principal:hover { background: var(--bleu-fonce); }
+}
+
+/* Visionneuse */
+/* Sans <dialog> (Safari avant 15.4), la visionneuse reste cachée et une vignette ouvre la photo seule (page.js). */
+.visionneuse:not([open]) { display: none; }
+.visionneuse { width: 100vw; height: 100vh; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; background: rgba(16, 15, 14, 0.97); color: #fff; }
+.visionneuse[open] { display: flex; flex-direction: column; }
+.visionneuse::backdrop { background: rgba(0, 0, 0, 0.9); }
+/* Piste : une vue par image, large comme l'écran ; le défilement du navigateur donne l'inertie, les crans et laisse le zoom à deux doigts tranquille. */
+.v-piste { flex: 1; min-height: 0; display: flex; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; }
+.v-piste::-webkit-scrollbar { display: none; }
+/* min-width: 0 : sinon WebKit élargit la vue à la largeur propre de l'image, trois écrans pour un plan (sizes="300vw"), et décale toutes les vues suivantes. */
+.v-vue { flex: 0 0 100%; min-width: 0; margin: 0; display: flex; align-items: center; justify-content: center; scroll-snap-align: center; scroll-snap-stop: always; }
+.v-vue picture { display: contents; }
+.v-vue img { max-width: 100vw; max-height: calc(100vh - 190px); max-height: calc(100dvh - 190px); width: auto; height: auto; object-fit: contain; }
+/* Hauteur de deux lignes réservée : une légende d'une ou deux lignes ne fait pas sauter la photo d'une image à l'autre. */
+.v-legende { margin: 0; padding: 10px 16px 4px; min-height: calc(3.2em + 14px); text-align: center; font-size: 0.95rem; line-height: 1.6; }
+/* Miniatures : bande défilante en bas, la photo affichée encadrée. */
+.v-miniatures { flex: none; display: flex; gap: 6px; overflow-x: auto; padding: 8px 12px 10px; padding: 8px 12px calc(10px + env(safe-area-inset-bottom)); scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.3) transparent; }
+.v-miniature { flex: none; padding: 0; border: 2px solid transparent; border-radius: 6px; background: none; cursor: pointer; opacity: 0.55; transition: opacity 0.2s, border-color 0.2s, transform 0.45s var(--ressort); }
+.v-miniature img { display: block; width: 72px; height: 48px; object-fit: cover; border-radius: 4px; }
+.v-miniature[aria-current="true"] { opacity: 1; border-color: var(--accent); }
+@media (hover: hover) { .v-miniature:hover { opacity: 0.9; transform: translateY(-2px); } }
+/* Rond blanc, glyphe gris foncé ; l'ombre le détache d'une photo claire. Glyphe non sélectionnable : un double clic n'y laisse pas de surlignage. */
+.v-fermer, .v-prec, .v-suiv { position: absolute; border: 0; background: rgba(255, 255, 255, 0.92); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3); color: #3A3632; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; width: 48px; height: 48px; border-radius: 50%; font-size: 1.8rem; line-height: 1; cursor: pointer; }
+.v-fermer { top: 12px; top: max(12px, env(safe-area-inset-top)); right: 12px; }
+.v-prec { left: 10px; top: calc(50% - 50px); transform: translateY(-50%); }
+.v-suiv { right: 10px; top: calc(50% - 50px); transform: translateY(-50%); }
+@media (hover: hover) { .v-fermer:hover, .v-prec:hover, .v-suiv:hover { background: #fff; } }
+/* Centrées sans justify-content: center, qui rendrait inaccessible le début de la bande quand elle déborde. */
+.v-miniatures::before, .v-miniatures::after { content: ""; margin: auto; }
+/* Vues et miniatures de la galerie qui n'est pas ouverte. */
+.v-vue[hidden], .v-miniature[hidden] { display: none; }
+/* Vue de fin de la page d'ensemble : une carte claire au milieu de la piste, un bouton par maison. */
+.v-fin-carte { width: 100%; max-width: 440px; margin: 0 64px; padding: 22px 18px; border-radius: var(--rayon); background: var(--fond); color: var(--encre); text-align: center; }
+.v-fin-carte p { margin: 0 0 16px; font-family: var(--serif); font-size: 1.15rem; line-height: 1.35; }
+.v-fin-carte .bouton { display: flex; width: 100%; margin-top: 10px; padding: 0 8px; font-size: 0.95rem; }
+.v-miniature-fin span { display: flex; align-items: center; justify-content: center; width: 72px; height: 48px; border-radius: 4px; background: var(--fond); color: var(--encre); font: 600 0.72rem/1.15 var(--sans); text-align: center; }
+@media (min-width: 960px) { .v-miniature-fin span { width: 96px; height: 64px; font-size: 0.8rem; } }
+/* Le focus est posé sur la visionneuse à l'ouverture, pas sur la première miniature, qui paraîtrait sélectionnée. */
+.visionneuse:focus, .visionneuse:focus-visible { outline: none; }
+@media (min-width: 960px) { .v-miniature img { width: 96px; height: 64px; } }
+
+/* Pages de texte */
+.page-texte { max-width: 760px; padding-top: 32px; padding-bottom: 64px; }
+.page-texte h1 { font-size: 2rem; }
+.page-texte h2 { font-size: 1.25rem; margin-top: 1.6em; }
+
+@media (min-width: 768px) {
+  .lieu-grille { grid-template-columns: minmax(0, 1fr) minmax(0, 460px); gap: 40px; }
+  .maisons-grille, .autres-grille { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .prix-detail { margin-top: 8px; }
+  .conteneur { padding-left: 32px; padding-right: 32px; }
+  .hero { display: block; padding: 32px 32px 36px; text-align: center; }
+  .hero-titre, .hero-prix, .hero .chiffres { padding: 0; }
+  .hero-photos { padding-top: 22px; }
+  .hero-prix { margin-top: 20px; }
+  .prix { display: inline; margin: 0 14px 0 0; font-size: 2.1rem; }
+  .prix-mention { display: inline; }
+  .hero .chiffres { justify-content: center; margin-top: 10px; }
+  .vers-autres { margin: 18px 0 0; }
+  .chiffres li { margin: 2px 14px; white-space: nowrap; }
+  /* Hauteur proche de la moitié de la largeur : la grande photo et les trois petites restent au format 3:2 ; écran bas : la mosaïque se tasse. */
+  .mosaique { display: grid; grid-template-columns: 3fr 1fr; grid-template-rows: repeat(3, 1fr); gap: 8px; height: 46vw; max-height: 540px; max-height: min(540px, 58vh); overflow: visible; padding: 0; }
+  .mosaique::after { content: none; }
+  .mosaique li { margin: 0; min-height: 0; }
+  .mosaique li:first-child { grid-row: 1 / span 3; }
+  .mosaique .vignette, .mosaique picture, .mosaique .vignette img { height: 100%; }
+  /* En bas à droite de la grande photo : la colonne des petites fait un quart de la largeur, moins l'espace entre les deux. */
+  .voir-photos { right: calc(25% + 18px); bottom: 12px; }
+  .essentiel { padding: 34px 0 28px; }
+  .essentiel ol { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0 28px; }
+  .essentiel li { border-top-width: 2px; padding-top: 16px; }
+  .galerie { gap: 10px; }
+  .galerie-3 { grid-template-columns: repeat(3, 1fr); }
+  .galerie-3 li:first-child { grid-column: auto; }
+  .galerie-4 { grid-template-columns: repeat(4, 1fr); }
+  .galerie-4 .grande { grid-row: 1; }
+  .vendeur-grille { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 48px; align-items: start; }
+  .vendeur-grille .contact { margin-top: 0; }
+  .portrait { width: 112px; height: 112px; margin-right: 20px; }
+  /* Une grande et quatre petites : la grande prend deux colonnes et deux rangées, les petites se rangent à sa droite. */
+  .galerie-mosaique .grande { grid-column: 1 / span 2; grid-row: 1 / span 2; }
+  .galerie-mosaique .grande .vignette, .galerie-mosaique .grande picture, .galerie-mosaique .grande img { height: 100%; }
+  .echelles { grid-template-columns: 1fr 1fr; gap: 40px; }
+  .etapes { grid-template-columns: repeat(4, 1fr); }
+  .histoire-images { gap: 10px; margin-top: 32px; }
+  .dossier-pile { width: 132px; height: 104px; }
+  .feuille { height: 96px; }
+}
+
+@media (min-width: 960px) {
+  body { padding-bottom: 0; }
+  .barre-actions { display: none; }
+  .entete-tel { display: inline-block; }
+  .entete-actions .bouton { display: inline-flex; }
+  .niveau { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-rows: auto 1fr; grid-template-areas: "titre plan" "texte plan" "photos photos" "plus plus"; column-gap: 48px; }
+  .niveau > h2 { grid-area: titre; }
+  .niveau-plan { grid-area: plan; margin: 0; }
+  .niveau-texte { grid-area: texte; }
+  .niveau .galerie { grid-area: photos; margin-top: 32px; }
+  .niveau > .plus-photos { grid-area: plus; }
+  .travaux-grille { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; }
+  .section { padding-top: 44px; padding-bottom: 44px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { transition: none !important; }
+}
+
+/* Page d'ensemble, écran large : les deux étiquettes à gauche, le tableau des dépenses à droite. */
+@media (min-width: 1100px) {
+  .dpe-grille { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 40px; align-items: center; }
+  .dpe-grille .echelles { margin: 0; }
+}
+
+/* Photos des environs, sous la carte du lieu : une bande à faire glisser sur téléphone, trois colonnes sur ordinateur. */
+.lieu-photos-titre { margin: 28px 0 10px; font-size: 1.2rem; }
+.lieu-photos { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; gap: 12px; margin: 0 -16px; padding: 0 16px 6px; scroll-padding: 0 16px; scrollbar-width: none; }
+.lieu-photos::-webkit-scrollbar { display: none; }
+.lieu-photos figure { flex: 0 0 80%; margin: 0; scroll-snap-align: start; }
+.lieu-photos img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; border-radius: 10px; }
+.lieu-photos figcaption { color: var(--doux); font-size: 0.88rem; margin-top: 6px; }
+@media (min-width: 600px) { .lieu-photos figure { flex-basis: 45%; } }
+@media (min-width: 960px) { .lieu-photos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; overflow: visible; margin: 0; padding: 0; } }
